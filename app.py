@@ -12,7 +12,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
-from reportlab.platypus import PageTemplate, Frame
+from reportlab.platypus import PageBreak, Frame, PageTemplate
 
 
 st.set_page_config(page_title="Risk Questionnaire", page_icon="📊", layout="centered")
@@ -385,26 +385,24 @@ def generate_pdf(tol_total, tol_level, tol_desc, cap_total, cap_level, cap_desc,
         elements.append(Spacer(1, 6))
 
 # --- Notes footer (guaranteed bottom of final page) -------------------------
-from reportlab.platypus import PageBreak, Frame, PageTemplate
-
-def add_footer(canvas, doc):
-    canvas.saveState()
-    canvas.setFont("Helvetica", 8)
-    footer_text = ("Notes: Each risk profile reflects a different blend of local and global equities "
-                   "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
-                   "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
-                   "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
-                   "Results are based on 20 years of daily data using rolling one-year periods.")
-    canvas.drawCentredString(105*mm, 15*mm, footer_text)
-    canvas.restoreState()
-
-frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
-template = PageTemplate(id='footer', frames=frame, onPage=add_footer)
-doc.addPageTemplates([template])
-
-doc.build(elements)
-buffer.seek(0)
-return buffer.getvalue()
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        footer_text = ("Notes: Each risk profile reflects a different blend of local and global equities "
+                       "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
+                       "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
+                       "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
+                       "Results are based on 20 years of daily data using rolling one-year periods.")
+        canvas.drawCentredString(105*mm, 15*mm, footer_text)
+        canvas.restoreState()
+    
+    frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+    template = PageTemplate(id='footer', frames=frame, onPage=add_footer)
+    doc.addPageTemplates([template])
+    
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 
