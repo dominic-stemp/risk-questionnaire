@@ -151,8 +151,8 @@ risk_capacity = Section(
         ]),
         Question("Excluding your home loan or car finance, how would you describe your current debt situation?", [
             "I’m completely debt-free",
-            "I have little or no debt apart from short-term expenses",
-            "I have manageable debts and make payments comfortably",
+            "I have no debt, though I sometimes use a credit card and pay it off immediately",
+            "I have manageable debts that I usually pay off by the end of the month",
             "I have debts that sometimes feel difficult to manage or cause financial pressure",
             "I have significant debts that are difficult to manage",            
         ]),
