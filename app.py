@@ -153,7 +153,7 @@ risk_capacity = Section(
             "I’m completely debt-free",
             "I have little or no debt apart from short-term expenses",
             "I have manageable debts and make payments comfortably",
-            "I have debts that sometimes feel difficult to manage or cause financial pressure"
+            "I have debts that sometimes feel difficult to manage or cause financial pressure",
             "I have significant debts that are difficult to manage",            
         ]),
         Question("How many months of living expenses could you cover using your savings and other easily accessible liquid assets?", [
@@ -325,17 +325,6 @@ def generate_pdf(tol_total, tol_level, tol_desc, cap_total, cap_level, cap_desc,
         ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
     ]))
     elements.append(tp)
-# --- Notes Section (centered paragraph, no table) --------------------------------------
-    elements.append(Spacer(1, 14))
-    elements.append(Paragraph(
-        "<para align='center'><b>Notes:</b> Each risk profile reflects a different blend of local and global equities "
-        "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
-        "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
-        "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
-        "Results are based on 20 years of daily data using rolling one-year periods.</para>",
-        normal
-    ))
-    elements.append(Spacer(1, 16))
 
     # --- Box & Whisker chart (centered & well spaced)
     chart_path = "box_whisker_summary.png"
@@ -392,6 +381,25 @@ def generate_pdf(tol_total, tol_level, tol_desc, cap_total, cap_level, cap_desc,
         elements.append(qa_table)
         elements.append(Spacer(1, 6))
 
+    # --- Notes Section (smaller text, bottom of final page) -------------------------
+    elements.append(PageBreak())
+    elements.append(Spacer(1, 420))
+    small = ParagraphStyle("small", fontSize=8.5, leading=11, alignment=1)
+    elements.append(Paragraph(
+        "<b>Notes:</b> Each risk profile reflects a different blend of local and global equities "
+        "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
+        "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
+        "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
+        "Results are based on 20 years of daily data using rolling one-year periods.",
+        small
+    ))
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
+
+    elements.append(Spacer(1, 16))
+                     
     doc.build(elements)
     buffer.seek(0)
     return buffer.getvalue()
