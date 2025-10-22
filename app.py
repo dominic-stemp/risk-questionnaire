@@ -12,7 +12,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
-
+from reportlab.platypus import PageTemplate, Frame
 
 
 st.set_page_config(page_title="Risk Questionnaire", page_icon="📊", layout="centered")
@@ -80,11 +80,11 @@ risk_tolerance = Section(
             "Sell most or all of my investments",            
         ]), 
         Question("You’re given an unexpected R50 000 bonus. You can either keep it safely or take a chance at earning more. Which option sounds most like you?", [
-            "Risk it all for a 10 % chance to make ten times your money.",
-            "Take a 25 % chance to triple it, or lose it all.",
-            "Take a 50 % chance to double it, or lose it all.",
-            "50 % chance of getting R75 000, or 50 % chance of getting R25 000.",
-            "Keep the full R50 000 — guaranteed.",
+            "Big risk, big reward – 10% chance to turn it into R500 000, or lose it all.",
+            "High risk – 25% chance to turn it into R150 000, or lose it all.",
+            "Moderate risk – 50% chance to turn it into R100 000, or lose it all.",
+            "Small risk – 50% chance to get R75 000, or R25 000.",
+            "No risk – keep the guaranteed R50 000.",
         ]),
         Question("A close friend is launching a new renewable-energy business. They believe it could return 5–10× your investment within five years, but there’s a good chance you could lose everything. If you could afford it, how much would you realistically invest?", [
             "A large stake — I’d put in whatever it takes if the upside looks exciting.",
@@ -100,13 +100,14 @@ risk_tolerance = Section(
             "A little — I prefer low risk",
             "None — I want safety and stability",
         ]),
-        Question("Which investment option appeals to you most?", [
-            "Very high risk / very high return potential",
-            "High risk / high return potential",
-            "Moderate risk / moderate return potential",
-            "Low risk / low return potential",
-            "No risk / low but guaranteed return",
+        Question("Suppose you own a business or investment that’s fallen sharply in price, but your research shows its true value has actually increased. What would you do?", [
+            "Sell immediately — a falling price means something is wrong",
+            "Sell some — to reduce risk until things stabilise",
+            "Hold — wait to see if the price recovers",
+            "Buy more — confident the market will catch up to true value",
+            "Strongly buy more — trust my analysis completely, even when others panic",
         ]),
+
         Question("When you see alarming financial news or market headlines that could affect your portfolio, how do you typically react?", [
             "I ignore most of it — short-term noise doesn’t bother me",
             "I read it, but rarely take any action",
@@ -325,6 +326,8 @@ def generate_pdf(tol_total, tol_level, tol_desc, cap_total, cap_level, cap_desc,
         ("BACKGROUND", (0, 1), (-1, -1), colors.whitesmoke),
     ]))
     elements.append(tp)
+   
+    elements.append(Spacer(1, 50))  # try 50; adjust up/down for more or less gap
 
     # --- Box & Whisker chart (centered & well spaced)
     chart_path = "box_whisker_summary.png"
@@ -381,28 +384,21 @@ def generate_pdf(tol_total, tol_level, tol_desc, cap_total, cap_level, cap_desc,
         elements.append(qa_table)
         elements.append(Spacer(1, 6))
 
-    # --- Notes Section (smaller text, bottom of final page) -------------------------
-    elements.append(PageBreak())
-    elements.append(Spacer(1, 420))
-    small = ParagraphStyle("small", fontSize=8.5, leading=11, alignment=1)
-    elements.append(Paragraph(
-        "<b>Notes:</b> Each risk profile reflects a different blend of local and global equities "
-        "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
-        "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
-        "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
-        "Results are based on 20 years of daily data using rolling one-year periods.",
-        small
-    ))
+# --- Notes footer ---------------------------------------------------------
+def add_notes(canvas, doc):
+    text = ("Notes: Each risk profile reflects a different blend of local and global equities "
+            "versus local bonds: Conservative (20% local equity, 10% global equity, 70% local bonds); "
+            "Mod. Conservative (30%/15%/55%); Moderate (40%/20%/40%); "
+            "Mod. Aggressive (50%/25%/25%); Aggressive (60%/30%/10%). "
+            "Results are based on 20 years of daily data using rolling one-year periods.")
+    canvas.saveState()
+    canvas.setFont("Helvetica", 8)
+    canvas.drawCentredString(105*mm, 18*mm, text)
+    canvas.restoreState()
 
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer.getvalue()
-
-    elements.append(Spacer(1, 16))
-                     
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer.getvalue()
+doc.build(elements, onLaterPages=add_notes)
+buffer.seek(0)
+return buffer.getvalue()
 
 
 
